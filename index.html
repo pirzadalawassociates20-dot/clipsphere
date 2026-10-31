@@ -1,308 +1,757 @@
 <!DOCTYPE html>
-<html lang="ur">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>میری ٹک ٹاک ویب سائٹ</title>
+    <title>CineStream - Stream & Discover Movies</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            red: '#E50914',
+                            redHover: '#B81D24',
+                            darkBg: '#0f0f12',
+                            cardBg: '#18181c',
+                            cardHover: '#23232a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* Base Reset & Styling */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
         body {
-            background-color: #000;
-            color: #fff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow: hidden;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
-
-        /* App Container (Mobile Frame) */
-        .app-container {
-            width: 100%;
-            max-width: 414px;
-            height: 100vh;
-            background-color: #000;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        /* Custom Smooth Scrollbar */
+        ::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
         }
-
-        /* Video Feed (Vertical Scroll Snap) */
-        .video-feed {
-            height: 100%;
-            width: 100%;
-            overflow-y: scroll;
-            scroll-snap-type: y mandatory;
-            scrollbar-width: none; /* Firefox */
+        ::-webkit-scrollbar-track {
+            background: #0f0f12;
         }
-
-        .video-feed::-webkit-scrollbar {
-            display: none; /* Chrome/Safari */
+        ::-webkit-scrollbar-thumb {
+            background: #2a2a35;
+            border-radius: 9999px;
         }
-
-        /* Video Card */
-        .video-card {
-            width: 100%;
-            height: 100vh;
-            scroll-snap-align: start;
-            scroll-snap-stop: always;
-            position: relative;
-            background-color: #111;
+        ::-webkit-scrollbar-thumb:hover {
+            background: #E50914;
         }
-
-        .video-player {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            cursor: pointer;
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
         }
-
-        /* Video Overlay Info (Bottom-Left) */
-        .video-details {
-            position: absolute;
-            bottom: 75px;
-            left: 15px;
-            right: 80px;
-            z-index: 10;
-            text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
-
-        .username {
-            font-weight: 700;
-            font-size: 16px;
-            margin-bottom: 8px;
-            cursor: pointer;
+        /* Card Hover Scale */
+        .movie-card {
+            transition: transform 0.25s ease-in-out, box-shadow 0.25s ease-in-out;
         }
-
-        .caption {
-            font-size: 14px;
-            line-height: 1.4;
-            margin-bottom: 10px;
-        }
-
-        .music-track {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-        }
-
-        /* Sidebar Action Buttons (Right Side) */
-        .sidebar {
-            position: absolute;
-            right: 12px;
-            bottom: 90px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 18px;
-            z-index: 10;
-        }
-
-        .action-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-            user-select: none;
-            transition: transform 0.15s ease;
-        }
-
-        .action-btn:active {
-            transform: scale(1.2);
-        }
-
-        .icon-wrapper {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(5px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 22px;
-            margin-bottom: 4px;
-            transition: color 0.3s ease, background 0.3s ease;
-        }
-
-        .action-btn.liked .icon-wrapper {
-            color: #fe2c55;
-            background: rgba(254, 44, 85, 0.2);
-        }
-
-        .count {
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        /* Footer Navigation Bar */
-        .navbar {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 60px;
-            background: rgba(0, 0, 0, 0.9);
-            border-top: 0.5px solid rgba(255, 255, 255, 0.15);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 20;
-        }
-
-        .nav-link {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: #8a8b91;
-            font-size: 10px;
-            gap: 4px;
-            cursor: pointer;
-        }
-
-        .nav-link.active {
-            color: #fff;
-        }
-
-        .nav-icon {
-            font-size: 20px;
-        }
-
-        /* Center Create (+) Button */
-        .add-btn {
-            width: 45px;
-            height: 28px;
-            background: linear-gradient(90deg, #00f2fe 0%, #4facfe 50%, #fe2c55 100%);
-            border-radius: 8px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #000;
-            font-weight: bold;
-            font-size: 18px;
+        .movie-card:hover {
+            transform: translateY(-6px) scale(1.02);
         }
     </style>
 </head>
-<body>
+<body class="bg-gray-100 dark:bg-brand-darkBg text-gray-800 dark:text-gray-100 min-h-screen transition-colors duration-200">
 
-    <div class="app-container">
-        <!-- Video Feed -->
-        <div class="video-feed" id="videoFeed">
+    <!-- Top Navigation Header -->
+    <header class="sticky top-0 z-40 bg-white/90 dark:bg-brand-darkBg/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800/80 transition-all">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+            
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-8">
+                <a href="#" onclick="showHome()" class="flex items-center gap-2 group">
+                    <div class="w-9 h-9 rounded-xl bg-brand-red flex items-center justify-center text-white font-black text-xl shadow-lg shadow-brand-red/30 group-hover:scale-105 transition-transform">
+                        <i class="fa-solid fa-play text-sm ml-0.5"></i>
+                    </div>
+                    <span class="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white">Cine<span class="text-brand-red">Stream</span></span>
+                </a>
 
-            <!-- Video 1 -->
-            <div class="video-card">
-                <video class="video-player" loop onclick="togglePlay(this)">
-                    <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
-                </video>
-                
-                <div class="video-details">
-                    <div class="username">@tech_coder</div>
-                    <div class="caption">میری پہلی ٹک ٹاک ویب سائٹ تیار ہو گئی! 🚀 #coding #webdev</div>
-                    <div class="music-track">🎵 <span>Original Sound - @tech_coder</span></div>
-                </div>
-
-                <div class="sidebar">
-                    <div class="action-btn" onclick="toggleLike(this, 12500)">
-                        <div class="icon-wrapper">❤️</div>
-                        <span class="count">12.5k</span>
-                    </div>
-                    <div class="action-btn">
-                        <div class="icon-wrapper">💬</div>
-                        <span class="count">842</span>
-                    </div>
-                    <div class="action-btn">
-                        <div class="icon-wrapper">↪️</div>
-                        <span class="count">شیئر</span>
-                    </div>
-                </div>
+                <!-- Nav Links (Desktop) -->
+                <nav class="hidden md:flex items-center gap-6 text-sm font-semibold text-gray-600 dark:text-gray-300">
+                    <button onclick="filterByNav('all')" id="navHome" class="hover:text-brand-red dark:hover:text-brand-red transition-colors text-brand-red">Home</button>
+                    <button onclick="filterByNav('movies')" id="navMovies" class="hover:text-brand-red dark:hover:text-brand-red transition-colors">Movies</button>
+                    <button onclick="filterByNav('trending')" id="navTrending" class="hover:text-brand-red dark:hover:text-brand-red transition-colors">Trending</button>
+                    <button onclick="showWatchlistSection()" id="navWatchlist" class="hover:text-brand-red dark:hover:text-brand-red transition-colors flex items-center gap-1.5">
+                        My List
+                        <span id="watchlistCountBadge" class="bg-brand-red text-white text-[10px] px-1.5 py-0.5 rounded-full hidden">0</span>
+                    </button>
+                </nav>
             </div>
 
-            <!-- Video 2 -->
-            <div class="video-card">
-                <video class="video-player" loop onclick="togglePlay(this)">
-                    <source src="https://assets.mixkit.co/videos/preview/mixkit-tree-with-yellow-flowers-1173-large.mp4" type="video/mp4">
-                </video>
-                
-                <div class="video-details">
-                    <div class="username">@nature_hub</div>
-                    <div class="caption">خوبصورت مناظر اور سکون ✨ #nature #peace</div>
-                    <div class="music-track">🎵 <span>Relaxing Beats - Nature Sound</span></div>
+            <!-- Search & Actions -->
+            <div class="flex items-center gap-3">
+                <!-- Search Input -->
+                <div class="relative w-40 sm:w-64">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                    <input type="text" id="searchInput" placeholder="Search movies, genres..." 
+                        class="w-full pl-9 pr-8 py-2 text-xs sm:text-sm bg-gray-200/70 dark:bg-gray-800/80 text-gray-900 dark:text-white rounded-full border border-transparent focus:border-brand-red focus:outline-none transition-all">
+                    <button id="clearSearchBtn" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
+                        <i class="fa-solid fa-xmark text-xs"></i>
+                    </button>
                 </div>
 
-                <div class="sidebar">
-                    <div class="action-btn" onclick="toggleLike(this, 45200)">
-                        <div class="icon-wrapper">❤️</div>
-                        <span class="count">45.2k</span>
+                <!-- Dark/Light Theme Switch -->
+                <button id="themeToggleBtn" title="Toggle Theme" class="p-2.5 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">
+                    <i class="fa-solid fa-moon text-sm dark:hidden"></i>
+                    <i class="fa-solid fa-sun text-sm hidden dark:block text-yellow-400"></i>
+                </button>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg text-gray-600 dark:text-gray-300">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Menu Dropdown -->
+        <div id="mobileMenu" class="hidden md:hidden border-t border-gray-200 dark:border-gray-800 px-4 py-3 space-y-2 bg-white dark:bg-brand-darkBg">
+            <button onclick="filterByNav('all'); toggleMobileMenu()" class="block w-full text-left py-1.5 font-medium text-sm text-gray-700 dark:text-gray-200 hover:text-brand-red">Home</button>
+            <button onclick="filterByNav('movies'); toggleMobileMenu()" class="block w-full text-left py-1.5 font-medium text-sm text-gray-700 dark:text-gray-200 hover:text-brand-red">Movies</button>
+            <button onclick="filterByNav('trending'); toggleMobileMenu()" class="block w-full text-left py-1.5 font-medium text-sm text-gray-700 dark:text-gray-200 hover:text-brand-red">Trending</button>
+            <button onclick="showWatchlistSection(); toggleMobileMenu()" class="block w-full text-left py-1.5 font-medium text-sm text-gray-700 dark:text-gray-200 hover:text-brand-red">My Watchlist</button>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-10">
+
+        <!-- Search / Filter State Section (Hidden by default) -->
+        <section id="searchResultsSection" class="hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <i class="fa-solid fa-film text-brand-red"></i> <span id="searchResultTitle">Results</span>
+                </h2>
+                <span id="resultCount" class="text-sm font-semibold text-gray-500">0 items found</span>
+            </div>
+            <div id="searchResultsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+                <!-- Dynamically Inserted Cards -->
+            </div>
+            <div id="noResultsMsg" class="hidden text-center py-20 text-gray-500">
+                <i class="fa-solid fa-video-slash text-5xl mb-4 text-gray-400 dark:text-gray-600"></i>
+                <p class="text-lg font-semibold">No movies found matching your search.</p>
+                <button onclick="clearSearch()" class="mt-4 px-4 py-2 bg-brand-red text-white text-sm font-medium rounded-lg hover:bg-brand-redHover">
+                    Reset Filter
+                </button>
+            </div>
+        </section>
+
+        <!-- Default Content (Hero Banner + Movie Rows) -->
+        <div id="defaultHomeContent" class="space-y-10">
+
+            <!-- Hero Spotlight Banner -->
+            <section id="heroBanner" class="relative rounded-3xl overflow-hidden shadow-2xl bg-gray-900 text-white min-h-[420px] sm:min-h-[480px] flex items-end">
+                <!-- Dynamic Hero Backdrop Image -->
+                <div id="heroBackdrop" class="absolute inset-0 bg-cover bg-center transition-all duration-700 scale-105" style="background-image: url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=1200&q=80');"></div>
+                <!-- Gradient Overlay -->
+                <div class="absolute inset-0 bg-gradient-to-t from-brand-darkBg via-brand-darkBg/60 to-transparent"></div>
+                <div class="absolute inset-0 bg-gradient-to-r from-brand-darkBg/90 via-brand-darkBg/40 to-transparent"></div>
+
+                <!-- Hero Details -->
+                <div class="relative z-10 p-6 sm:p-10 max-w-2xl space-y-4">
+                    <div class="flex items-center gap-3">
+                        <span class="bg-brand-red text-white text-xs font-extrabold uppercase px-2.5 py-1 rounded-md tracking-wider">Spotlight</span>
+                        <span id="heroGenre" class="text-xs font-semibold text-gray-300 bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10">Sci-Fi / Drama</span>
+                        <span id="heroRating" class="text-xs font-semibold text-yellow-400 flex items-center gap-1"><i class="fa-solid fa-star"></i> 8.8</span>
                     </div>
-                    <div class="action-btn">
-                        <div class="icon-wrapper">💬</div>
-                        <span class="count">1.2k</span>
-                    </div>
-                    <div class="action-btn">
-                        <div class="icon-wrapper">↪️</div>
-                        <span class="count">شیئر</span>
+
+                    <h1 id="heroTitle" class="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
+                        Interstellar
+                    </h1>
+
+                    <p id="heroSynopsis" class="text-gray-300 text-sm sm:text-base line-clamp-3 leading-relaxed font-light">
+                        When Earth becomes uninhabitable, a team of ex-NASA pilots takes on a daring mission through a wormhole to find a new home for humanity across the galaxy.
+                    </p>
+
+                    <div class="pt-2 flex items-center gap-3">
+                        <button id="heroPlayBtn" onclick="openTrailerModal('Interstellar Trailer', 'https://www.youtube.com/embed/zSWdZVtXT7E')" class="bg-brand-red hover:bg-brand-redHover text-white px-6 py-3 rounded-xl font-bold text-sm shadow-lg shadow-brand-red/30 flex items-center gap-2 transition-all hover:scale-105">
+                            <i class="fa-solid fa-play"></i> Watch Trailer
+                        </button>
+                        <button id="heroMoreInfoBtn" onclick="openMovieModal(1)" class="bg-white/20 hover:bg-white/30 text-white backdrop-blur-md border border-white/20 px-5 py-3 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all">
+                            <i class="fa-solid fa-circle-info"></i> More Info
+                        </button>
                     </div>
                 </div>
-            </div>
+            </section>
+
+            <!-- Category Pills Bar -->
+            <section class="space-y-3">
+                <h3 class="text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Explore Genres</h3>
+                <div class="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar" id="genreCategoryTabs">
+                    <!-- Dynamic Pills Generated in JS -->
+                </div>
+            </section>
+
+            <!-- Section 1: Trending Movies Carousel / Grid -->
+            <section class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <i class="fa-solid fa-fire text-brand-red"></i> Trending Now
+                    </h2>
+                    <button onclick="filterByGenre('Action')" class="text-xs font-semibold text-brand-red hover:underline">View All</button>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6" id="trendingGrid">
+                    <!-- Dynamic Cards -->
+                </div>
+            </section>
+
+            <!-- Section 2: Sci-Fi & Adventure -->
+            <section class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <i class="fa-solid fa-rocket text-purple-500"></i> Sci-Fi & Fantasy
+                    </h2>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6" id="scifiGrid">
+                    <!-- Dynamic Cards -->
+                </div>
+            </section>
+
+            <!-- Section 3: Action & Crime -->
+            <section class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <i class="fa-solid fa-gun text-amber-500"></i> Action & Blockbusters
+                    </h2>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6" id="actionGrid">
+                    <!-- Dynamic Cards -->
+                </div>
+            </section>
 
         </div>
 
-        <!-- Navigation Bar -->
-        <div class="navbar">
-            <div class="nav-link active">
-                <span class="nav-icon">🏠</span>
-                <span>ہوم</span>
+    </main>
+
+    <!-- Movie Details Modal Window -->
+    <div id="movieModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white dark:bg-brand-cardBg w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden transform transition-all my-8 relative border border-gray-200 dark:border-gray-800">
+            
+            <!-- Close Button -->
+            <button id="closeModalBtn" onclick="closeMovieModal()" class="absolute top-4 right-4 z-20 bg-black/60 text-white hover:bg-brand-red w-10 h-10 rounded-full flex items-center justify-center transition-colors">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <!-- Modal Backdrop Image Header -->
+            <div class="relative h-64 sm:h-80 bg-gray-900">
+                <img id="modalBackdrop" src="" alt="Movie Backdrop" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-white dark:from-brand-cardBg via-transparent to-transparent"></div>
+                <div class="absolute bottom-4 left-6 right-6 flex items-end justify-between gap-4">
+                    <div>
+                        <span id="modalYear" class="text-xs font-extrabold text-brand-red uppercase tracking-wider bg-black/50 px-2.5 py-1 rounded-md backdrop-blur-md">2023</span>
+                        <h2 id="modalTitle" class="text-2xl sm:text-4xl font-extrabold text-gray-900 dark:text-white mt-1">Movie Title</h2>
+                    </div>
+                </div>
             </div>
-            <div class="nav-link">
-                <span class="nav-icon">🔍</span>
-                <span>تلاش</span>
-            </div>
-            <div class="nav-link">
-                <div class="add-btn">+</div>
-            </div>
-            <div class="nav-link">
-                <span class="nav-icon">💬</span>
-                <span>ان باکس</span>
-            </div>
-            <div class="nav-link">
-                <span class="nav-icon">👤</span>
-                <span>پروفائل</span>
+
+            <!-- Modal Body Details -->
+            <div class="p-6 sm:p-8 space-y-6">
+                <!-- Meta Info Bar -->
+                <div class="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-gray-600 dark:text-gray-300 font-medium pb-2 border-b border-gray-200 dark:border-gray-800">
+                    <span class="flex items-center gap-1 text-yellow-500 font-bold">
+                        <i class="fa-solid fa-star"></i> <span id="modalRating">8.5</span>
+                    </span>
+                    <span class="text-gray-400">•</span>
+                    <span id="modalDuration"><i class="fa-regular fa-clock mr-1"></i> 2h 28m</span>
+                    <span class="text-gray-400">•</span>
+                    <span id="modalDirector" class="text-gray-500 dark:text-gray-400">Director: Christopher Nolan</span>
+                    <span class="text-gray-400">•</span>
+                    <div id="modalGenres" class="flex flex-wrap gap-1.5">
+                        <!-- Genre tags -->
+                    </div>
+                </div>
+
+                <!-- Plot Synopsis -->
+                <div class="space-y-2">
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Storyline</h3>
+                    <p id="modalPlot" class="text-gray-700 dark:text-gray-300 text-sm sm:text-base leading-relaxed font-light">
+                        Full movie plot description will appear right here.
+                    </p>
+                </div>
+
+                <!-- Cast List -->
+                <div class="space-y-2">
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Top Cast</h3>
+                    <p id="modalCast" class="text-sm text-gray-800 dark:text-gray-200 font-medium"></p>
+                </div>
+
+                <!-- Modal Actions -->
+                <div class="pt-4 flex flex-wrap items-center gap-4">
+                    <button id="modalTrailerBtn" onclick="" class="bg-brand-red hover:bg-brand-redHover text-white px-6 py-3 rounded-xl font-bold text-sm shadow-lg shadow-brand-red/30 flex items-center gap-2 transition-transform hover:scale-105">
+                        <i class="fa-solid fa-play"></i> Watch Trailer
+                    </button>
+                    <button id="modalBookmarkBtn" onclick="" class="bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-900 dark:text-white px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2 transition-all">
+                        <i class="fa-regular fa-bookmark"></i> Add to My List
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- JavaScript Logic -->
+    <!-- Video Trailer Player Modal -->
+    <div id="trailerModal" class="fixed inset-0 z-50 hidden bg-black/95 flex items-center justify-center p-4">
+        <div class="w-full max-w-4xl relative aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-gray-800">
+            <button onclick="closeTrailerModal()" class="absolute top-4 right-4 z-10 bg-brand-red text-white w-10 h-10 rounded-full flex items-center justify-center hover:scale-110 transition-transform">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <iframe id="trailerIframe" class="w-full h-full" src="" title="Movie Trailer" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <!-- Application Script Logic -->
     <script>
-        // Video Play/Pause on Click
-        function togglePlay(video) {
-            if (video.paused) {
-                video.play();
+        // Database of Movies & Shows
+        const moviesDatabase = [
+            {
+                id: 1,
+                title: "Interstellar",
+                year: 2014,
+                rating: 8.7,
+                duration: "2h 49m",
+                director: "Christopher Nolan",
+                cast: "Matthew McConaughey, Anne Hathaway, Jessica Chastain",
+                genres: ["Sci-Fi", "Drama", "Adventure"],
+                category: "trending",
+                poster: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=500&q=80",
+                backdrop: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=1200&q=80",
+                synopsis: "When Earth becomes uninhabitable in the future, a farmer and ex-NASA pilot, Joseph Cooper, is tasked to pilot a spacecraft, along with a team of researchers, to find a new planet for humans.",
+                trailerUrl: "https://www.youtube.com/embed/zSWdZVtXT7E"
+            },
+            {
+                id: 2,
+                title: "Cyber City 2077",
+                year: 2023,
+                rating: 8.4,
+                duration: "2h 15m",
+                director: "Denis Villeneuve",
+                cast: "Keanu Reeves, Ana de Armas, Ryan Gosling",
+                genres: ["Sci-Fi", "Action"],
+                category: "scifi",
+                poster: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=500&q=80",
+                backdrop: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
+                synopsis: "In a neon-lit dystopian metropolis overrun by artificial intelligence and rogue cybernetics, a lone detective uncovers a conspiracy that threatens human consciousness itself.",
+                trailerUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+            },
+            {
+                id: 3,
+                title: "The Dark Knight",
+                year: 2008,
+                rating: 9.0,
+                duration: "2h 32m",
+                director: "Christopher Nolan",
+                cast: "Christian Bale, Heath Ledger, Aaron Eckhart",
+                genres: ["Action", "Crime", "Drama"],
+                category: "action",
+                poster: "https://images.unsplash.com/photo-1509281373149-e957c6296406?auto=format&fit=crop&w=500&q=80",
+                backdrop: "https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?auto=format&fit=crop&w=1200&q=80",
+                synopsis: "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
+                trailerUrl: "https://www.youtube.com/embed/EXeTwQWrcwY"
+            },
+            {
+                id: 4,
+                title: "Inception",
+                year: 2010,
+                rating: 8.8,
+                duration: "2h 28m",
+                director: "Christopher Nolan",
+                cast: "Leonardo DiCaprio, Joseph Gordon-Levitt, Elliot Page",
+                genres: ["Sci-Fi", "Action", "Thriller"],
+                category: "trending",
+                poster: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=500&q=80",
+                backdrop: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200&q=80",
+                synopsis: "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
+                trailerUrl: "https://www.youtube.com/embed/YoHD9XEInc0"
+            },
+            {
+                id: 5,
+                title: "Dune: Part Two",
+                year: 2024,
+                rating: 8.6,
+                duration: "2h 46m",
+                director: "Denis Villeneuve",
+                cast: "Timothée Chalamet, Zendaya, Rebecca Ferguson",
+                genres: ["Sci-Fi", "Adventure"],
+                category: "scifi",
+                poster: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=500&q=80",
+                backdrop: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200&q=80",
+                synopsis: "Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.",
+                trailerUrl: "https://www.youtube.com/embed/Way9Dexny3w"
+            },
+            {
+                id: 6,
+                title: "Mad Max: Fury Road",
+                year: 2015,
+                rating: 8.1,
+                duration: "2h 0m",
+                director: "George Miller",
+                cast: "Tom Hardy, Charlize Theron, Nicholas Hoult",
+                genres: ["Action", "Adventure"],
+                category: "action",
+                poster: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=500&q=80",
+                backdrop: "https://images.unsplash.com/photo-1509281373149-e957c6296406?auto=format&fit=crop&w=1200&q=80",
+                synopsis: "In a post-apocalyptic wasteland, a woman rebels against a tyrannical ruler in search for her homeland with the aid of a group of female prisoners and a drifter named Max.",
+                trailerUrl: "https://www.youtube.com/embed/hEJnMQG9ev8"
+            },
+            {
+                id: 7,
+                title: "Pulp Fiction",
+                year: 1994,
+                rating: 8.9,
+                duration: "2h 34m",
+                director: "Quentin Tarantino",
+                cast: "John Travolta, Uma Thurman, Samuel L. Jackson",
+                genres: ["Crime", "Drama"],
+                category: "trending",
+                poster: "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=500&q=80",
+                backdrop: "https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?auto=format&fit=crop&w=1200&q=80",
+                synopsis: "The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.",
+                trailerUrl: "https://www.youtube.com/embed/s7EdQ4FqbhY"
+            },
+            {
+                id: 8,
+                title: "Gladiator",
+                year: 2000,
+                rating: 8.5,
+                duration: "2h 35m",
+                director: "Ridley Scott",
+                cast: "Russell Crowe, Joaquin Phoenix, Connie Nielsen",
+                genres: ["Action", "Drama"],
+                category: "action",
+                poster: "https://images.unsplash.com/photo-1509281373149-e957c6296406?auto=format&fit=crop&w=500&q=80",
+                backdrop: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=1200&q=80",
+                synopsis: "A former Roman General sets out to exact vengeance against the corrupt emperor who murdered his family and sent him into slavery.",
+                trailerUrl: "https://www.youtube.com/embed/owK1qxDselE"
+            }
+        ];
+
+        // Unique genres list
+        const allGenres = ["All", "Trending", "Action", "Sci-Fi", "Drama", "Crime", "Adventure"];
+
+        // User Watchlist State
+        let myWatchlist = JSON.parse(localStorage.getItem('cineStream_watchlist')) || [1, 3];
+
+        // Active State
+        let activeModalMovieId = null;
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            renderGenreTabs();
+            renderCategoryGrids();
+            updateWatchlistBadge();
+
+            // Search Listener
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', (e) => handleSearch(e.target.value));
+
+            // Clear search
+            document.getElementById('clearSearchBtn').addEventListener('click', clearSearch);
+
+            // Theme Toggle
+            document.getElementById('themeToggleBtn').addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+            });
+
+            // Mobile Menu Toggle
+            document.getElementById('mobileMenuBtn').addEventListener('click', toggleMobileMenu);
+        });
+
+        // Toggle Mobile Menu
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Render Genre Pills
+        function renderGenreTabs() {
+            const container = document.getElementById('genreCategoryTabs');
+            container.innerHTML = allGenres.map(genre => `
+                <button onclick="filterByGenre('${genre}')" 
+                    class="genre-pill px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap bg-gray-200 dark:bg-brand-cardBg text-gray-700 dark:text-gray-300 hover:bg-brand-red hover:text-white dark:hover:bg-brand-red">
+                    ${genre}
+                </button>
+            `).join('');
+        }
+
+        // Generate Card HTML
+        function createMovieCardHTML(movie) {
+            const isBookmarked = myWatchlist.includes(movie.id);
+            return `
+                <div class="movie-card bg-white dark:bg-brand-cardBg rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-md group cursor-pointer flex flex-col justify-between" onclick="openMovieModal(${movie.id})">
+                    <div class="relative aspect-[2/3] overflow-hidden bg-gray-800">
+                        <img src="${movie.poster}" alt="${movie.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                            <button onclick="event.stopPropagation(); openTrailerModal('${movie.title}', '${movie.trailerUrl}')" class="w-full py-2 bg-brand-red text-white text-xs font-bold rounded-lg shadow flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-play"></i> Trailer
+                            </button>
+                        </div>
+                        <button onclick="event.stopPropagation(); toggleWatchlist(${movie.id})" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center hover:bg-brand-red transition-colors">
+                            <i class="${isBookmarked ? 'fa-solid text-brand-red' : 'fa-regular'} fa-bookmark text-xs"></i>
+                        </button>
+                    </div>
+                    <div class="p-3 space-y-1">
+                        <div class="flex items-center justify-between text-[11px] font-bold text-gray-400">
+                            <span>${movie.year}</span>
+                            <span class="text-yellow-500 flex items-center gap-1"><i class="fa-solid fa-star text-[10px]"></i> ${movie.rating}</span>
+                        </div>
+                        <h3 class="font-bold text-sm text-gray-900 dark:text-white line-clamp-1 group-hover:text-brand-red transition-colors">${movie.title}</h3>
+                        <p class="text-[11px] text-gray-500 line-clamp-1">${movie.genres.join(', ')}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render Grids
+        function renderCategoryGrids() {
+            const trending = moviesDatabase.filter(m => m.category === 'trending' || m.rating >= 8.7);
+            const scifi = moviesDatabase.filter(m => m.genres.includes('Sci-Fi'));
+            const action = moviesDatabase.filter(m => m.genres.includes('Action'));
+
+            document.getElementById('trendingGrid').innerHTML = trending.map(createMovieCardHTML).join('');
+            document.getElementById('scifiGrid').innerHTML = scifi.map(createMovieCardHTML).join('');
+            document.getElementById('actionGrid').innerHTML = action.map(createMovieCardHTML).join('');
+        }
+
+        // Open Detail Modal
+        function openMovieModal(id) {
+            const movie = moviesDatabase.find(m => m.id === id);
+            if (!movie) return;
+
+            activeModalMovieId = movie.id;
+            document.getElementById('modalTitle').textContent = movie.title;
+            document.getElementById('modalYear').textContent = movie.year;
+            document.getElementById('modalRating').textContent = movie.rating;
+            document.getElementById('modalDuration').textContent = movie.duration;
+            document.getElementById('modalDirector').textContent = `Director: ${movie.director}`;
+            document.getElementById('modalPlot').textContent = movie.synopsis;
+            document.getElementById('modalCast').textContent = movie.cast;
+            document.getElementById('modalBackdrop').src = movie.backdrop;
+
+            // Genres
+            document.getElementById('modalGenres').innerHTML = movie.genres.map(g => `
+                <span class="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-2 py-0.5 rounded text-[11px] font-semibold">${g}</span>
+            `).join('');
+
+            // Buttons
+            document.getElementById('modalTrailerBtn').onclick = () => openTrailerModal(movie.title, movie.trailerUrl);
+            
+            updateModalBookmarkBtn();
+
+            document.getElementById('movieModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('movieModal').classList.add('hidden');
+        }
+
+        function closeMovieModal() {
+            document.getElementById('movieModal').classList.add('hidden');
+        }
+
+        // Watchlist functionality
+        function toggleWatchlist(movieId) {
+            const index = myWatchlist.indexOf(movieId);
+            if (index > -1) {
+                myWatchlist.splice(index, 1);
             } else {
-                video.pause();
+                myWatchlist.push(movieId);
+            }
+            localStorage.setItem('cineStream_watchlist', JSON.stringify(myWatchlist));
+            updateWatchlistBadge();
+            renderCategoryGrids();
+            if (activeModalMovieId === movieId) {
+                updateModalBookmarkBtn();
             }
         }
 
-        // Like Button Toggle & Counter
-        function toggleLike(element, initialCount) {
-            const countSpan = element.querySelector('.count');
-            const isLiked = element.classList.contains('liked');
+        function updateModalBookmarkBtn() {
+            const btn = document.getElementById('modalBookmarkBtn');
+            const isSaved = myWatchlist.includes(activeModalMovieId);
+            btn.innerHTML = isSaved ? 
+                `<i class="fa-solid fa-bookmark text-brand-red"></i> Saved in My List` : 
+                `<i class="fa-regular fa-bookmark"></i> Add to My List`;
+            btn.onclick = () => toggleWatchlist(activeModalMovieId);
+        }
 
-            if (isLiked) {
-                element.classList.remove('liked');
-                countSpan.innerText = (initialCount / 1000).toFixed(1) + 'k';
+        function updateWatchlistBadge() {
+            const badge = document.getElementById('watchlistCountBadge');
+            badge.textContent = myWatchlist.length;
+            if (myWatchlist.length > 0) badge.classList.remove('hidden');
+            else badge.classList.add('hidden');
+        }
+
+        function showWatchlistSection() {
+            const savedMovies = moviesDatabase.filter(m => myWatchlist.includes(m.id));
+            document.getElementById('defaultHomeContent').classList.add('hidden');
+            document.getElementById('searchResultsSection').classList.remove('hidden');
+            document.getElementById('searchResultTitle').textContent = 'My Watchlist';
+            document.getElementById('resultCount').textContent = `${savedMovies.length} items`;
+
+            const grid = document.getElementById('searchResultsGrid');
+            const noRes = document.getElementById('noResultsMsg');
+
+            if (savedMovies.length === 0) {
+                grid.innerHTML = '';
+                noRes.classList.remove('hidden');
             } else {
-                element.classList.add('liked');
-                countSpan.innerText = ((initialCount + 1) / 1000).toFixed(1) + 'k';
+                noRes.classList.add('hidden');
+                grid.innerHTML = savedMovies.map(createMovieCardHTML).join('');
             }
         }
+
+        // Filter / Search Handlers
+        function handleSearch(query) {
+            const clearBtn = document.getElementById('clearSearchBtn');
+            const defaultContent = document.getElementById('defaultHomeContent');
+            const searchSec = document.getElementById('searchResultsSection');
+            const grid = document.getElementById('searchResultsGrid');
+            const noRes = document.getElementById('noResultsMsg');
+
+            if (!query.trim()) {
+                clearBtn.classList.add('hidden');
+                searchSec.classList.add('hidden');
+                defaultContent.classList.remove('hidden');
+                return;
+            }
+
+            clearBtn.classList.remove('hidden');
+            defaultContent.classList.add('hidden');
+            searchSec.classList.remove('hidden');
+
+            const results = moviesDatabase.filter(m => 
+                m.title.toLowerCase().includes(query.toLowerCase()) ||
+                m.genres.some(g => g.toLowerCase().includes(query.toLowerCase())) ||
+                m.cast.toLowerCase().includes(query.toLowerCase())
+            );
+
+            document.getElementById('searchResultTitle').textContent = `Search: "${query}"`;
+            document.getElementById('resultCount').textContent = `${results.length} found`;
+
+            if (results.length === 0) {
+                grid.innerHTML = '';
+                noRes.classList.remove('hidden');
+            } else {
+                noRes.classList.add('hidden');
+                grid.innerHTML = results.map(createMovieCardHTML).join('');
+            }
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            handleSearch('');
+        }
+
+        function showHome() {
+            clearSearch();
+        }
+
+        function filterByGenre(genre) {
+            if (genre === 'All') {
+                showHome();
+                return;
+            }
+            const results = moviesDatabase.filter(m => 
+                m.genres.includes(genre) || (genre === 'Trending' && m.category === 'trending')
+            );
+            document.getElementById('defaultHomeContent').classList.add('hidden');
+            document.getElementById('searchResultsSection').classList.remove('hidden');
+            document.getElementById('searchResultTitle').textContent = `${genre} Movies`;
+            document.getElementById('resultCount').textContent = `${results.length} items`;
+            
+            document.getElementById('searchResultsGrid').innerHTML = results.map(createMovieCardHTML).join('');
+            document.getElementById('noResultsMsg').classList.add('hidden');
+        }
+
+        function filterByNav(type) {
+            if (type === 'all') showHome();
+            else if (type === 'movies') filterByGenre('Action');
+            else if (type === 'trending') filterByGenre('Trending');
+        }
+
+        // Trailer Video Modal
+        function openTrailerModal(title, url) {
+            const modal = document.getElementById('trailerModal');
+            const iframe = document.getElementById('trailerIframe');
+            iframe.src = url + "?autoplay=1";
+            modal.classList.remove('hidden');
+        }
+
+        function closeTrailerModal() {
+            const modal = document.getElementById('trailerModal');
+            const iframe = document.getElementById('trailerIframe');
+            iframe.src = "";
+            modal.classList.add('hidden');
+        }
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Web Platform</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0f172a; color: #f8fafc; line-height: 1.6; }
+        header { display: flex; justify-space-between; align-items: center; padding: 1.5rem 2rem; background: #1e293b; border-bottom: 1px solid #334155; }
+        .logo { font-size: 1.5rem; font-weight: bold; color: #38bdf8; }
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+        .card { background: #1e293b; border-radius: 8px; padding: 1.5rem; border: 1px solid #334155; }
+        .card h3 { color: #38bdf8; margin-bottom: 0.5rem; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">GlobalApp</div>
+        <div>Region: Worldwide</div>
+    </header>
+
+    <div class="container">
+        <h1 style="margin-bottom: 1.5rem;">World Trending Content</h1>
+        <div class="grid" id="contentGrid">
+            <!-- Dynamic items loaded via API -->
+        </div>
+    </div>
+
+    <script>
+        // Production backend API URL (Replace with deployed backend)
+        const API_URL = 'https://your-backend-domain.com/api/media';
+
+        async function fetchGlobalData() {
+            try {
+                // Mock local response fallback
+                const data = [
+                    { title: "Worldwide Movie Stream", category: "Cinema", rating: "9.2" },
+                    { title: "Global App Store", category: "Software", rating: "4.8" },
+                    { title: "International News Hub", category: "Media", rating: "4.5" }
+                ];
+
+                const grid = document.getElementById('contentGrid');
+                grid.innerHTML = data.map(item => `
+                    <div class="card">
+                        <h3>${item.title}</h3>
+                        <p>Category: ${item.category}</p>
+                        <p>Rating: ⭐ ${item.rating}</p>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error fetching global content:', error);
+            }
+        }
+
+        fetchGlobalData();
     </script>
 </body>
 </html>
