@@ -754,4 +754,591 @@
         fetchGlobalData();
     </script>
 </body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClipSphere - Global Video Community</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-color: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --border-color: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5r em;
+        }
+
+        .search-bar {
+            flex: 0 1 400px;
+            padding: 0.6rem 1rem;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-color);
+            color: var(--text-color);
+            outline: none;
+        }
+
+        .upload-btn {
+            background-color: var(--accent-color);
+            color: #0f172a;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .upload-btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .categories {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+        .chip {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: 0.2s;
+        }
+
+        .chip.active, .chip:hover {
+            background: var(--accent-color);
+            color: #0f172a;
+            border-color: var(--accent-color);
+        }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .video-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s;
+        }
+
+        .video-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .video-thumbnail {
+            height: 180px;
+            background: #334155;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            position: relative;
+        }
+
+        .video-info {
+            padding: 1rem;
+        }
+
+        .video-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: var(--text-color);
+        }
+
+        .channel-name {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .video-stats {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-content h2 {
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.6rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .cancel-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">🌐 ClipSphere</div>
+        <input type="text" class="search-bar" placeholder="Search creators, videos, tags..." id="searchInput">
+        <button class="upload-btn" onclick="openModal()">+ Upload Video</button>
+    </header>
+
+    <div class="container">
+        <div class="categories">
+            <div class="chip active">All</div>
+            <div class="chip">Trending</div>
+            <div class="chip">Tech & Coding</div>
+            <div class="chip">Music</div>
+            <div class="chip">Gaming</div>
+            <div class="chip">Entertainment</div>
+        </div>
+
+        <div class="video-grid" id="videoGrid">
+            <!-- Dynamic Videos -->
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div class="modal" id="uploadModal">
+        <div class="modal-content">
+            <h2>Upload New Video</h2>
+            <div class="form-group">
+                <label>Video Title</label>
+                <input type="text" id="videoTitleInput" placeholder="Enter catchy title...">
+            </div>
+            <div class="form-group">
+                <label>Creator / Channel Name</label>
+                <input type="text" id="channelInput" placeholder="Your name or brand...">
+            </div>
+            <div class="modal-actions">
+                <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+                <button class="upload-btn" onclick="addNewVideo()">Publish</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let videos = [
+            { title: "Building My First Web App from Scratch", channel: "CodeMaster", views: "14K views", time: "2 days ago" },
+            { title: "Global Web Development Trends 2026", channel: "TechInsider", views: "45K views", time: "1 week ago" },
+            { title: "Cybersecurity & Law Basics", channel: "DigitalLawyer", views: "8.2K views", time: "3 days ago" },
+            { title: "Lo-Fi Beats to Code/Relax To", channel: "VibeRadio", views: "120K views", time: "Streaming live" }
+        ];
+
+        function renderVideos(items) {
+            const grid = document.getElementById('videoGrid');
+            grid.innerHTML = items.map(v => `
+                <div class="video-card">
+                    <div class="video-thumbnail">▶ Preview Stream</div>
+                    <div class="video-info">
+                        <div class="video-title">${v.title}</div>
+                        <div class="channel-name">${v.channel}</div>
+                        <div class="video-stats">${v.views} • ${v.time}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openModal() {
+            document.getElementById('uploadModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('uploadModal').style.display = 'none';
+        }
+
+        function addNewVideo() {
+            const title = document.getElementById('videoTitleInput').value;
+            const channel = document.getElementById('channelInput').value;
+            if(title && channel) {
+                videos.unshift({ title, channel, views: "1 view", time: "Just now" });
+                renderVideos(videos);
+                closeModal();
+                document.getElementById('videoTitleInput').value = '';
+                document.getElementById('channelInput').value = '';
+            } else {
+                alert("Please fill in all fields!");
+            }
+        }
+
+        // Search feature
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = videos.filter(v => v.title.toLowerCase().includes(term) || v.channel.toLowerCase().includes(term));
+            renderVideos(filtered);
+        });
+
+        // Initial render
+        renderVideos(videos);
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClipSphere - Global Video Platform</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-color: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --border-color: #334155;
+            --heart-color: #ef4444;
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #0f172a;
+            --text-secondary: #64748b;
+            --accent-color: #0284c7;
+            --accent-hover: #0369a1;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+        }
+
+        header {
+            display: flex; justify-space-between; align-items: center;
+            padding: 1rem 2rem; background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky; top: 0; z-index: 100;
+        }
+
+        .logo { font-size: 1.5rem; font-weight: bold; color: var(--accent-color); }
+        
+        .header-actions { display: flex; gap: 1rem; align-items: center; }
+
+        .search-bar {
+            flex: 0 1 400px; padding: 0.6rem 1rem; border-radius: 20px;
+            border: 1px solid var(--border-color); background: var(--bg-color);
+            color: var(--text-color); outline: none;
+        }
+
+        .btn {
+            background-color: var(--accent-color); color: #fff; border: none;
+            padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: bold;
+            cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;
+        }
+
+        .btn-theme {
+            background: transparent; border: 1px solid var(--border-color);
+            color: var(--text-color); border-radius: 50%; width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+        }
+
+        .container { max-width: 1400px; margin: 2rem auto; padding: 0 1.5rem; }
+
+        .video-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .video-card {
+            background: var(--card-bg); border-radius: 12px; overflow: hidden;
+            border: 1px solid var(--border-color); transition: transform 0.2s;
+        }
+
+        .video-card:hover { transform: translateY(-4px); }
+
+        .video-thumbnail {
+            height: 180px; background: #334155; display: flex;
+            align-items: center; justify-content: center; color: #fff;
+            font-size: 1.2rem; font-weight: bold; cursor: pointer;
+        }
+
+        .video-info { padding: 1rem; }
+
+        .video-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.4rem; }
+
+        .channel-name { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.8rem; }
+
+        .card-actions {
+            display: flex; justify-space-between; align-items: center;
+            padding-top: 0.6rem; border-top: 1px solid var(--border-color);
+        }
+
+        .like-btn, .comment-btn {
+            background: transparent; border: none; color: var(--text-secondary);
+            cursor: pointer; display: flex; align-items: center; gap: 0.3rem; font-size: 0.9rem;
+        }
+
+        .like-btn.liked { color: var(--heart-color); }
+
+        /* Modals */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); justify-content: center; align-items: center; z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--card-bg); padding: 2rem; border-radius: 12px;
+            width: 90%; max-width: 500px; border: 1px solid var(--border-color);
+        }
+
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.4rem; font-size: 0.9rem; }
+        .form-group input, .form-group textarea {
+            width: 100%; padding: 0.6rem; border-radius: 6px;
+            border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-color);
+        }
+
+        .comments-list { max-height: 200px; overflow-y: auto; margin-bottom: 1rem; }
+        .comment-item { padding: 0.5rem 0; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <header>
+        <div class="logo">🌐 ClipSphere</div>
+        <input type="text" class="search-bar" placeholder="Search videos..." id="searchInput">
+        <div class="header-actions">
+            <button class="btn-theme" onclick="toggleTheme()" id="themeBtn">🌙</button>
+            <button class="btn" onclick="openUploadModal()">+ Upload</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="video-grid" id="videoGrid"></div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div class="modal" id="uploadModal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 1rem;">Upload Video</h2>
+            <div class="form-group">
+                <label>Title</label>
+                <input type="text" id="videoTitleInput">
+            </div>
+            <div class="form-group">
+                <label>Channel Name</label>
+                <input type="text" id="channelInput">
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+                <button class="btn" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-color);" onclick="closeModal('uploadModal')">Cancel</button>
+                <button class="btn" onclick="addNewVideo()">Publish</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comments Modal -->
+    <div class="modal" id="commentsModal">
+        <div class="modal-content">
+            <h3 id="modalVideoTitle" style="margin-bottom: 0.5rem;"></h3>
+            <div class="comments-list" id="commentsList"></div>
+            <div class="form-group">
+                <input type="text" id="newCommentInput" placeholder="Write a comment...">
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+                <button class="btn" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-color);" onclick="closeModal('commentsModal')">Close</button>
+                <button class="btn" onclick="addComment()">Post</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let videos = [
+            { id: 1, title: "Building My First Web App", channel: "CodeMaster", likes: 120, liked: false, comments: ["Great video!", "Very helpful."] },
+            { id: 2, title: "Global Web Development 2026", channel: "TechInsider", likes: 450, liked: false, comments: ["Awesome content!"] }
+        ];
+
+        let activeVideoId = null;
+
+        function renderVideos(items) {
+            const grid = document.getElementById('videoGrid');
+            grid.innerHTML = items.map(v => `
+                <div class="video-card">
+                    <div class="video-thumbnail">▶ Play Video</div>
+                    <div class="video-info">
+                        <div class="video-title">${v.title}</div>
+                        <div class="channel-name">${v.channel}</div>
+                        <div class="card-actions">
+                            <button class="like-btn ${v.liked ? 'liked' : ''}" onclick="toggleLike(${v.id})">
+                                ❤️ <span>${v.likes}</span>
+                            </button>
+                            <button class="comment-btn" onclick="openCommentsModal(${v.id})">
+                                💬 <span>${v.comments.length} Comments</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleLike(id) {
+            const video = videos.find(v => v.id === id);
+            if (video) {
+                video.liked = !video.liked;
+                video.likes += video.liked ? 1 : -1;
+                renderVideos(videos);
+            }
+        }
+
+        function openCommentsModal(id) {
+            activeVideoId = id;
+            const video = videos.find(v => v.id === id);
+            document.getElementById('modalVideoTitle').innerText = video.title;
+            renderComments();
+            document.getElementById('commentsModal').style.display = 'flex';
+        }
+
+        function renderComments() {
+            const video = videos.find(v => v.id === activeVideoId);
+            const list = document.getElementById('commentsList');
+            list.innerHTML = video.comments.map(c => `<div class="comment-item">💬 ${c}</div>`).join('');
+        }
+
+        function addComment() {
+            const input = document.getElementById('newCommentInput');
+            if (input.value.trim() && activeVideoId) {
+                const video = videos.find(v => v.id === activeVideoId);
+                video.comments.push(input.value.trim());
+                input.value = '';
+                renderComments();
+                renderVideos(videos);
+            }
+        }
+
+        function openUploadModal() { document.getElementById('uploadModal').style.display = 'flex'; }
+        function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+
+        function addNewVideo() {
+            const title = document.getElementById('videoTitleInput').value;
+            const channel = document.getElementById('channelInput').value;
+            if (title && channel) {
+                videos.unshift({ id: Date.now(), title, channel, likes: 0, liked: false, comments: [] });
+                renderVideos(videos);
+                closeModal('uploadModal');
+                document.getElementById('videoTitleInput').value = '';
+                document.getElementById('channelInput').value = '';
+            }
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            document.getElementById('themeBtn').innerText = isDark ? '☀️' : '🌙';
+        }
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            renderVideos(videos.filter(v => v.title.toLowerCase().includes(term) || v.channel.toLowerCase().includes(term)));
+        });
+
+        renderVideos(videos);
+    </script>
+</body>
 </html>
